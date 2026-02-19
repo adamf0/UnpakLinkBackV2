@@ -388,7 +388,7 @@ func GetLinkByShortHandlerfunc(c *fiber.Ctx) error {
 
 	query := GetLinkDefault.GetLinkDefaultByShortQuery{
 		Short:     short,
-		DoCounter: apiKey == "putiklink",
+		DoCounter: apiKey == os.Getenv("Administrator"),
 		IpClient:  helper.StrPtr(ipClient),
 		IP:        helper.StrPtr(ip),
 		ISO:       helper.StrPtr(iso),

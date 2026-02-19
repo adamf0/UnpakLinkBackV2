@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: backend
+
+    extra_hosts:
+      - "remote-simak:172.16.21.3"
+      - "remote-db:172.16.20.135"
+
+    environment:
+      Administrator: "putiklink"
+      USERNAME_AUTH: "putik"
+      PASSWORD_AUTH: "123"
+
+      DB_SOURCE: "appuser:StrongPassword123!@tcp(remote-db:3306)/unpak_link?charset=utf8mb4&parseTime=true&loc=Local"
+      DB_SIMAK: "host2:host22017!@tcp(remote-simak:30130)/unpak_link?charset=utf8mb4&parseTime=true&loc=Local"
+
+    ports:
+      - "3000:3000"
+
+    restart: unless-stopped

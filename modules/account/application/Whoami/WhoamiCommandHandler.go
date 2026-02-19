@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"os"
 
 	domainaccount "UnpakSiamida/modules/account/domain"
 	"time"
@@ -29,7 +30,7 @@ func (h *WhoamiCommandHandler) Handle(
 		return nil, domainaccount.NotFound(cmd.SID)
 	}
 
-	if cmd.SID == "putiklink" {
+	if cmd.SID == os.Getenv("Administrator") {
 		return &domainaccount.Account{
 			ID:        "putiklink",
 			UUID:      nil,
