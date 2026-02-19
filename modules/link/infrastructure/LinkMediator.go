@@ -27,21 +27,7 @@ import (
 )
 
 func RegisterModuleLink(db *gorm.DB) error {
-	// dsn := "root:@tcp(127.0.0.1:3306)/unpak_link?charset=utf8mb4&parseTime=true&loc=Local"
-
-	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	// if err != nil {
-	// 	return fmt.Errorf("Indikator Renstra DB connection failed: %w", err)
-	// 	// panic(err)
-	// }
-
 	repoLink := NewLinkRepository(db)
-	// if err := db.AutoMigrate(&domainLink.Link{}); err != nil {
-	// 	panic(err)
-	// }
-
-	// Pipeline behavior
-	// mediatr.RegisterRequestPipelineBehaviors(NewValidationBehaviorLink())
 
 	// Register request handler
 	mediatr.RegisterRequestHandler[

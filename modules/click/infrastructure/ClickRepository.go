@@ -3,8 +3,11 @@ package infrastructure
 import (
 	commondomain "UnpakSiamida/common/domain"
 	domainClick "UnpakSiamida/modules/click/domain"
+	domainLink "UnpakSiamida/modules/link/domain"
 	"context"
 	"strings"
+
+	"gorm.io/hints"
 
 	"gorm.io/gorm"
 )
@@ -49,94 +52,132 @@ func (r *ClickRepository) GetAll(
 	page, limit *int,
 ) ([]domainClick.ClickDefault, int64, error) {
 
-	var rows = make([]domainClick.ClickDefault, 0)
+	var clicks []domainClick.Click
+	var rows []domainClick.ClickDefault
 	var total int64
 
-	db := r.db.WithContext(ctx).
-		Table("clicks c").
-		Select(`
-			c.id AS ID,
-			l.uuid AS LinkUUID,
-			l.id AS LinkId,
-			l.short_url as LinkShort,
-			l.long_url as LinkLong,
+	base := r.db.WithContext(ctx).
+		Model(&domainClick.Click{}).
+		Clauses(hints.ForceIndex("PRIMARY"))
 
-			c.ip as IP,
-			c.ip_client as IPClient,
-			c.iso_code as ISO,
-			c.country as Country,
-			c.user_agent as UserAgent,
-			c.created_at as Created
-		`).
-		Joins(`
-			JOIN links l 
-				ON c.link_id = l.id
-		`)
+	// -------------------------------------------------
+	// FILTER (khusus kolom link → pakai subquery)
+	// -------------------------------------------------
+	if len(searchFilters) > 0 || strings.TrimSpace(search) != "" {
 
-	// -----------------------------------
-	// ADVANCED FILTERS
-	// -----------------------------------
-	for _, f := range searchFilters {
-		col, ok := allowedSearchColumns[strings.ToLower(f.Field)]
-		if !ok {
-			continue
+		linkSub := r.db.Model(&domainLink.Link{}).Select("id")
+
+		for _, f := range searchFilters {
+			col, ok := allowedSearchColumns[strings.ToLower(f.Field)]
+			if !ok {
+				continue
+			}
+
+			val := ""
+			if f.Value != nil {
+				val = strings.TrimSpace(*f.Value)
+			}
+
+			switch strings.ToLower(f.Operator) {
+			case "eq":
+				linkSub = linkSub.Where(col+" = ?", val)
+			case "neq":
+				linkSub = linkSub.Where(col+" <> ?", val)
+			case "like":
+				linkSub = linkSub.Where(col+" LIKE ?", "%"+val+"%")
+			case "in":
+				linkSub = linkSub.Where(col+" IN ?", strings.Split(val, ","))
+			}
 		}
 
-		val := ""
-		if f.Value != nil {
-			val = strings.TrimSpace(*f.Value)
+		// global search
+		if strings.TrimSpace(search) != "" {
+			like := "%" + search + "%"
+			var or []string
+			var args []interface{}
+
+			for _, col := range allowedSearchColumns {
+				or = append(or, col+" LIKE ?")
+				args = append(args, like)
+			}
+
+			linkSub = linkSub.Where("("+strings.Join(or, " OR ")+")", args...)
 		}
 
-		switch strings.ToLower(f.Operator) {
-		case "eq":
-			db = db.Where(col+" = ?", val)
-		case "neq":
-			db = db.Where(col+" <> ?", val)
-		case "like":
-			db = db.Where(col+" LIKE ?", "%"+val+"%")
-		case "in":
-			db = db.Where(col+" IN ?", strings.Split(val, ","))
-		}
+		base = base.Where("link_id IN (?)", linkSub)
 	}
 
-	// -----------------------------------
-	// GLOBAL SEARCH
-	// -----------------------------------
-	if strings.TrimSpace(search) != "" {
-		like := "%" + search + "%"
-		var or []string
-		var args []interface{}
-
-		for _, col := range allowedSearchColumns {
-			or = append(or, col+" LIKE ?")
-			args = append(args, like)
-		}
-
-		db = db.Where("("+strings.Join(or, " OR ")+")", args...)
-	}
-
-	// -----------------------------------
-	// COUNT
-	// -----------------------------------
-	if err := db.Count(&total).Error; err != nil {
+	// -------------------------------------------------
+	// COUNT (TANPA JOIN)
+	// -------------------------------------------------
+	if err := base.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// -----------------------------------
-	// ORDER + PAGINATION
-	// -----------------------------------
-	db = db.Order("c.id DESC")
+	// -------------------------------------------------
+	// PAGINATION (di clicks saja)
+	// -------------------------------------------------
+	base = base.Order("id DESC")
 
 	if page != nil && limit != nil && *limit > 0 {
 		offset := (*page - 1) * (*limit)
-		db = db.Offset(offset).Limit(*limit)
+		base = base.Offset(offset).Limit(*limit)
 	}
 
-	// -----------------------------------
-	// EXECUTE
-	// -----------------------------------
-	if err := db.Find(&rows).Error; err != nil {
+	if err := base.Find(&clicks).Error; err != nil {
 		return nil, 0, err
+	}
+
+	if len(clicks) == 0 {
+		return []domainClick.ClickDefault{}, total, nil
+	}
+
+	// -------------------------------------------------
+	// AMBIL LINKS SEKALI SAJA
+	// -------------------------------------------------
+	linkIDs := make([]uint, 0)
+	seen := make(map[uint]struct{})
+
+	for _, c := range clicks {
+		if _, ok := seen[c.LinkId]; !ok {
+			seen[c.LinkId] = struct{}{}
+			linkIDs = append(linkIDs, c.LinkId)
+		}
+	}
+
+	var links []domainLink.Link
+	if err := r.db.WithContext(ctx).
+		Model(&domainLink.Link{}).
+		Clauses(hints.ForceIndex("PRIMARY")).
+		Where("id IN ?", linkIDs).
+		Find(&links).Error; err != nil {
+		return nil, 0, err
+	}
+
+	linkMap := make(map[uint]domainLink.Link)
+	for _, l := range links {
+		linkMap[l.ID] = l
+	}
+
+	// -------------------------------------------------
+	// MERGE MEMORY (SUPER CEPAT)
+	// -------------------------------------------------
+	rows = make([]domainClick.ClickDefault, 0, len(clicks))
+
+	for _, c := range clicks {
+		l := linkMap[c.LinkId]
+
+		rows = append(rows, domainClick.ClickDefault{
+			LinkId:    l.ID,
+			LinkShort: l.ShortUrl,
+			LinkLong:  l.LongUrl,
+			IP:        c.IP,
+			IpClient:  c.IpClient,
+			ISO:       c.ISO,
+			Country:   c.Country,
+			UserAgent: c.UserAgent,
+			Created:   c.Created,
+		})
 	}
 
 	return rows, total, nil

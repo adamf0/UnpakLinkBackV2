@@ -129,5 +129,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/gorm v1.31.1 // indirect
+	gorm.io/hints v1.1.2
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )

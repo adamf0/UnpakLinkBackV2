@@ -100,12 +100,12 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		// DisableStartupMessage: true,
-		ReadBufferSize: 16 * 1024,
-		// Prefork:        true, // gunakan semua CPU cores
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  10 * time.Second,
-		ProxyHeader:  fiber.HeaderXForwardedFor,
+		ReadBufferSize: 32 * 1024,
+		Prefork:        true, // gunakan semua CPU cores
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		IdleTimeout:    10 * time.Second,
+		ProxyHeader:    fiber.HeaderXForwardedFor,
 	})
 	app.Use(recover.New(recover.Config{
 		EnableStackTrace: true,
@@ -138,10 +138,13 @@ func main() {
 	var db *gorm.DB
 	var dbSimak *gorm.DB
 
+	DB_SOURCE := os.Getenv("DB_SOURCE")
+	DB_SIMAK := os.Getenv("DB_SIMAK")
+
 	mustStart("Database Main", func() error {
 		var err error
 		db, err = NewMySQL(
-			"root:@tcp(127.0.0.1:3306)/unpak_link?charset=utf8mb4&parseTime=true&loc=Local",
+			DB_SOURCE,
 		)
 		return err
 	})
@@ -149,7 +152,7 @@ func main() {
 	mustStart("Database Simak", func() error {
 		var err error
 		dbSimak, err = NewMySQL(
-			"root:@tcp(127.0.0.1:3306)/unpak_simak?charset=utf8mb4&parseTime=true&loc=Local",
+			DB_SIMAK,
 		)
 		return err
 	})
@@ -285,7 +288,10 @@ func wrapValidationError(code string, err error) error {
 
 func NewMySQL(dsn string) (*gorm.DB, error) {
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
+	})
 	if err != nil {
 		return nil, err
 	}
