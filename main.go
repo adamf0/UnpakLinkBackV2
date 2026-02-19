@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -90,10 +88,10 @@ func mustStart(name string, fn func() error) {
 // @host localhost:3000
 // @BasePath /
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("No .env file found")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Println("No .env file found")
+	// }
 
 	cfg := commonpresentation.DefaultHeaderSecurityConfig()
 	cfg.ResolveAndCheck = false
@@ -101,11 +99,11 @@ func main() {
 	app := fiber.New(fiber.Config{
 		// DisableStartupMessage: true,
 		ReadBufferSize: 32 * 1024,
-		Prefork:        true, // gunakan semua CPU cores
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		IdleTimeout:    10 * time.Second,
-		ProxyHeader:    fiber.HeaderXForwardedFor,
+		// Prefork:        true, // gunakan semua CPU cores
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  10 * time.Second,
+		ProxyHeader:  fiber.HeaderXForwardedFor,
 	})
 	app.Use(recover.New(recover.Config{
 		EnableStackTrace: true,
