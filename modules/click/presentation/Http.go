@@ -109,5 +109,5 @@ func ModuleClick(app *fiber.App) {
 	// admin := []string{"admin"}
 	// whoamiURL := "http://localhost:3000/whoami"
 
-	app.Get("/clicks", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetAllClicksHandlerfunc)
+	app.Get("/api/clicks", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetAllClicksHandlerfunc)
 }

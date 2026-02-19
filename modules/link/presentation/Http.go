@@ -517,19 +517,19 @@ func ModuleLink(app *fiber.App) {
 	// admin := []string{"admin"}
 	// whoamiURL := "http://localhost:3000/whoami"
 
-	app.Get("/link/setupuuid", commonpresentation.JWTMiddleware(), SetupUuidLinksHandlerfunc)
+	app.Get("/api/link/setupuuid", commonpresentation.JWTMiddleware(), SetupUuidLinksHandlerfunc)
 
-	app.Post("/link", commonpresentation.JWTMiddleware(), CreateLinkHandlerfunc)
-	app.Put("/link/:uuid", commonpresentation.JWTMiddleware(), UpdateLinkHandlerfunc)
-	app.Put("/link/password/:uuid", commonpresentation.JWTMiddleware(), PasswordLinkHandlerfunc)
-	app.Put("/link/rollback-password/:uuid", commonpresentation.JWTMiddleware(), RolebackPasswordLinkHandlerfunc)
-	app.Put("/link/time/:uuid", commonpresentation.JWTMiddleware(), TimeLinkHandlerfunc)
-	app.Put("/link/rollback-time/:uuid", commonpresentation.JWTMiddleware(), RolebackTimeLinkHandlerfunc)
-	app.Put("/link/:uuid/:state", commonpresentation.JWTMiddleware(), MoveLinkHandlerfunc)
+	app.Post("/api/link", commonpresentation.JWTMiddleware(), CreateLinkHandlerfunc)
+	app.Put("/api/link/:uuid", commonpresentation.JWTMiddleware(), UpdateLinkHandlerfunc)
+	app.Put("/api/link/password/:uuid", commonpresentation.JWTMiddleware(), PasswordLinkHandlerfunc)
+	app.Put("/api/link/rollback-password/:uuid", commonpresentation.JWTMiddleware(), RolebackPasswordLinkHandlerfunc)
+	app.Put("/api/link/time/:uuid", commonpresentation.JWTMiddleware(), TimeLinkHandlerfunc)
+	app.Put("/api/link/rollback-time/:uuid", commonpresentation.JWTMiddleware(), RolebackTimeLinkHandlerfunc)
+	app.Put("/api/link/:uuid/:state", commonpresentation.JWTMiddleware(), MoveLinkHandlerfunc)
 
-	app.Delete("/link/:uuid", commonpresentation.JWTMiddleware(), DeleteLinkHandlerfunc)
-	app.Get("/link/:uuid", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetLinkHandlerfunc)
-	app.Get("/links", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetAllLinksHandlerfunc)
+	app.Delete("/api/link/:uuid", commonpresentation.JWTMiddleware(), DeleteLinkHandlerfunc)
+	app.Get("/api/link/:uuid", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetLinkHandlerfunc)
+	app.Get("/api/links", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetAllLinksHandlerfunc)
 
-	app.Get("/link/short/:short", commonpresentation.SmartCompress(), GetLinkByShortHandlerfunc)
+	app.Get("/api/link/short/:short", commonpresentation.SmartCompress(), GetLinkByShortHandlerfunc)
 }
