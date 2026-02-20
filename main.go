@@ -155,7 +155,7 @@ func main() {
 		dbSimak, err = NewMySQL(
 			DB_SIMAK,
 		)
-		log.Println("dbsimak:", dbSimak)
+		log.Println("dbsimak:", DB_SIMAK)
 		return err
 	})
 
