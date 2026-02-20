@@ -138,8 +138,8 @@ func main() {
 	var db *gorm.DB
 	var dbSimak *gorm.DB
 
-	DB_SOURCE := os.Getenv("DB_SOURCE")
-	DB_SIMAK := os.Getenv("DB_SIMAK")
+	DB_SOURCE := "putik:putik0k3@tcp(172.16.45.23:3306)/unpak-link?charset=utf8mb4&parseTime=true&loc=Local"
+	DB_SIMAK := "host2:host22017@tcp(172.16.21.3:30130)/unpak_simak?charset=utf8mb4&parseTime=true&loc=Local"
 
 	mustStart("Database Main", func() error {
 		var err error
