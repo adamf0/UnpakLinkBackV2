@@ -6,6 +6,7 @@ import (
 	"html"
 	"net"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -58,9 +59,33 @@ func DefaultBlacklistedHeaderNames() map[string]bool {
 }
 
 func DefaultHeaderSecurityConfig() *HeaderSecurityConfig {
+	raw := os.Getenv("CORS_ALLOWED_ORIGINS")
+
+	var domains []string
+
+	if raw != "" {
+		parts := strings.Split(raw, ",")
+		for _, p := range parts {
+			d := strings.TrimSpace(p)
+			if d != "" {
+				domains = append(domains, d)
+			}
+		}
+	}
+
+	// fallback default jika env kosong
+	if len(domains) == 0 {
+		domains = []string{
+			"unpak.link",
+			"localhost",
+			"localhost:3000",
+			"thunderclient.com",
+		}
+	}
+
 	return &HeaderSecurityConfig{
 		BlacklistedHeaderNames: DefaultBlacklistedHeaderNames(),
-		AllowDomains:           []string{"siamida.unpak.ac.id", "localhost", "localhost:3000", "thunderclient.com"},
+		AllowDomains:           domains,
 		MaxHeaderLen:           8192,
 		ResolveAndCheck:        false,
 		LookupTimeout:          1 * time.Second,
