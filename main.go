@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	"github.com/mehdihadeli/go-mediatr"
 
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -89,10 +90,10 @@ func mustStart(name string, fn func() error) {
 // @host localhost:3000
 // @BasePath /
 func main() {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Println("No .env file found")
-	// }
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found")
+	}
 
 	cfg := commonpresentation.DefaultHeaderSecurityConfig()
 	cfg.ResolveAndCheck = false
