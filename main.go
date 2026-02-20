@@ -152,10 +152,10 @@ func main() {
 
 	mustStart("Database Simak", func() error {
 		var err error
+		log.Println("dbsimak:", DB_SIMAK)
 		dbSimak, err = NewMySQL(
 			DB_SIMAK,
 		)
-		log.Println("dbsimak:", DB_SIMAK)
 		return err
 	})
 
