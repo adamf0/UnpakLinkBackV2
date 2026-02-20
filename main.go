@@ -146,6 +146,7 @@ func main() {
 		db, err = NewMySQL(
 			DB_SOURCE,
 		)
+		log.Println("db:", DB_SOURCE)
 		return err
 	})
 
@@ -154,6 +155,7 @@ func main() {
 		dbSimak, err = NewMySQL(
 			DB_SIMAK,
 		)
+		log.Println("dbsimak:", dbSimak)
 		return err
 	})
 
