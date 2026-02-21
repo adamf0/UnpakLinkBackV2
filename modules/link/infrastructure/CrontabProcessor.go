@@ -18,7 +18,7 @@ func (p *CrontabProcessor) Process(ctx context.Context) error {
 	now := time.Now().UTC()
 
 	if err := p.DB.
-		Where("end_access > ?", now).
+		Where("UNIX_TIMESTAMP(CONVERT_TZ(now(), @@session.time_zone, '+07:00')) >= UNIX_TIMESTAMP(end_access)").
 		Limit(10).
 		Find(&messages).Error; err != nil {
 		return err

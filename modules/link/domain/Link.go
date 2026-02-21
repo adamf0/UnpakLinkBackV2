@@ -36,6 +36,7 @@ func NewLink(shortUrl string, longUrl string, password *string, start *string, e
 
 	var startTime, endTime *time.Time
 	var err error
+	now := time.Now().UTC()
 
 	if start != nil {
 		dc := helper.NewDateChain(*start).
@@ -46,7 +47,10 @@ func NewLink(shortUrl string, longUrl string, password *string, start *string, e
 		if err != nil {
 			return common.FailureValue[*Link](InvalidFormatStart())
 		}
+	} else {
+		startTime = &now
 	}
+
 	if end != nil {
 		dc := helper.NewDateChain(*end).
 			UseParseStrategy(helper.DateLayoutFirstFactory{}.CreateParser()).
@@ -56,6 +60,9 @@ func NewLink(shortUrl string, longUrl string, password *string, start *string, e
 		if err != nil {
 			return common.FailureValue[*Link](InvalidFormatEnd())
 		}
+	} else {
+		t := now.AddDate(0, 0, 7) // +7 hari
+		endTime = &t
 	}
 
 	jenisfile := &Link{
