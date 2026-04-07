@@ -37,9 +37,9 @@ func (r *ClickRepository) Create(
 
 var allowedSearchColumns = map[string]string{
 	// key:param -> db column
-	"short_url": "l.short_url",
-	"long_url":  "l.long_url",
-	"creator":   "l.creator",
+	"short_url": "short_url",
+	"long_url":  "long_url",
+	"creator":   "creator",
 }
 
 // ------------------------
