@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"context"
+	"crypto/rsa"
 	"errors"
 	"html"
 	"net"
@@ -240,53 +241,148 @@ func HeaderSecurityMiddleware(cfg *HeaderSecurityConfig) fiber.Handler {
 	}
 }
 
-func JWTMiddleware() fiber.Handler {
+// func JWTMiddleware() fiber.Handler {
+// 	return func(c *fiber.Ctx) error {
+// 		authHeader := c.Get("Authorization")
+// 		if authHeader == "" {
+// 			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "authorization header missing"))
+// 		}
+
+// 		parts := strings.Split(authHeader, " ")
+// 		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+// 			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "authorization header format must be Bearer token"))
+// 		}
+
+// 		tokenStr := parts[1]
+
+// 		// Parse & validate token
+// 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+// 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+// 				return nil, errors.New("invalid signing method")
+// 			}
+// 			return jwtSecret, nil
+// 		})
+
+// 		if err != nil || !token.Valid {
+// 			if err != nil {
+// 				return c.Status(400).JSON(commoninfra.NewResponseError("common.token", err.Error()))
+// 			}
+// 			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "invalid token"))
+// 		}
+
+// 		claims, ok := token.Claims.(jwt.MapClaims)
+// 		if !ok {
+// 			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "invalid token claims"))
+// 		}
+
+// 		if exp, ok := claims["exp"].(float64); ok && int64(exp) < time.Now().Unix() {
+// 			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "token expired"))
+// 		}
+
+// 		// Inject sid ke form value
+// 		if sid, ok := claims["sid"].(string); ok {
+// 			c.Request().PostArgs().Set("sid", sid)
+// 		}
+
+// 		c.Request().PostArgs().Set("token", tokenStr)
+// 		// c.Locals("token", tokenStr)
+
+//			// lanjut ke handler berikutnya
+//			return c.Next()
+//		}
+//	}
+func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+
 		authHeader := c.Get("Authorization")
+
 		if authHeader == "" {
-			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "authorization header missing"))
+			return c.Status(400).JSON(
+				commoninfra.NewResponseError(
+					"common.token",
+					"authorization header missing",
+				),
+			)
 		}
 
 		parts := strings.Split(authHeader, " ")
+
 		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "authorization header format must be Bearer token"))
+			return c.Status(400).JSON(
+				commoninfra.NewResponseError(
+					"common.token",
+					"authorization header format must be Bearer token",
+				),
+			)
 		}
 
 		tokenStr := parts[1]
 
-		// Parse & validate token
+		/* =========================
+		 * PARSE TOKEN
+		 * ========================= */
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+
+			// wajib RS512
+			if t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
 				return nil, errors.New("invalid signing method")
 			}
-			return jwtSecret, nil
+
+			return publicKey, nil
 		})
 
-		if err != nil || !token.Valid {
-			if err != nil {
-				return c.Status(400).JSON(commoninfra.NewResponseError("common.token", err.Error()))
-			}
-			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "invalid token"))
+		if err != nil {
+			return c.Status(401).JSON(
+				commoninfra.NewResponseError(
+					"common.token",
+					err.Error(),
+				),
+			)
+		}
+
+		if !token.Valid {
+			return c.Status(401).JSON(
+				commoninfra.NewResponseError(
+					"common.token",
+					"invalid token",
+				),
+			)
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
+
 		if !ok {
-			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "invalid token claims"))
+			return c.Status(401).JSON(
+				commoninfra.NewResponseError(
+					"common.token",
+					"invalid token claims",
+				),
+			)
 		}
 
-		if exp, ok := claims["exp"].(float64); ok && int64(exp) < time.Now().Unix() {
-			return c.Status(400).JSON(commoninfra.NewResponseError("common.token", "token expired"))
+		/* =========================
+		 * EXP CHECK
+		 * ========================= */
+		if exp, ok := claims["exp"].(float64); ok {
+			if int64(exp) < time.Now().Unix() {
+				return c.Status(401).JSON(
+					commoninfra.NewResponseError(
+						"common.token",
+						"token expired",
+					),
+				)
+			}
 		}
 
-		// Inject sid ke form value
-		if sid, ok := claims["sid"].(string); ok {
+		/* =========================
+		 * SAVE CLAIMS
+		 * ========================= */
+		if sid, ok := claims["employeeid"].(string); ok {
 			c.Request().PostArgs().Set("sid", sid)
 		}
 
 		c.Request().PostArgs().Set("token", tokenStr)
-		// c.Locals("token", tokenStr)
 
-		// lanjut ke handler berikutnya
 		return c.Next()
 	}
 }

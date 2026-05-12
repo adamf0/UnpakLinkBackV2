@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"context"
+	"log"
 	"os"
 	"strings"
 
@@ -516,20 +517,25 @@ func SetupUuidLinksHandlerfunc(c *fiber.Ctx) error {
 func ModuleLink(app *fiber.App) {
 	// admin := []string{"admin"}
 	// whoamiURL := "http://localhost:3000/whoami"
+	pubKey, err := helper.LoadRSAPublicKey("public.pem")
 
-	app.Get("/api/link/setupuuid", commonpresentation.JWTMiddleware(), SetupUuidLinksHandlerfunc)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	app.Post("/api/link", commonpresentation.JWTMiddleware(), CreateLinkHandlerfunc)
-	app.Put("/api/link/:uuid", commonpresentation.JWTMiddleware(), UpdateLinkHandlerfunc)
-	app.Put("/api/link/password/:uuid", commonpresentation.JWTMiddleware(), PasswordLinkHandlerfunc)
-	app.Put("/api/link/rollback-password/:uuid", commonpresentation.JWTMiddleware(), RolebackPasswordLinkHandlerfunc)
-	app.Put("/api/link/time/:uuid", commonpresentation.JWTMiddleware(), TimeLinkHandlerfunc)
-	app.Put("/api/link/rollback-time/:uuid", commonpresentation.JWTMiddleware(), RolebackTimeLinkHandlerfunc)
-	app.Put("/api/link/:uuid/:state", commonpresentation.JWTMiddleware(), MoveLinkHandlerfunc)
+	app.Get("/api/link/setupuuid", commonpresentation.JWTMiddleware(pubKey), SetupUuidLinksHandlerfunc)
 
-	app.Delete("/api/link/:uuid", commonpresentation.JWTMiddleware(), DeleteLinkHandlerfunc)
-	app.Get("/api/link/:uuid", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetLinkHandlerfunc)
-	app.Get("/api/links", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetAllLinksHandlerfunc)
+	app.Post("/api/link", commonpresentation.JWTMiddleware(pubKey), CreateLinkHandlerfunc)
+	app.Put("/api/link/:uuid", commonpresentation.JWTMiddleware(pubKey), UpdateLinkHandlerfunc)
+	app.Put("/api/link/password/:uuid", commonpresentation.JWTMiddleware(pubKey), PasswordLinkHandlerfunc)
+	app.Put("/api/link/rollback-password/:uuid", commonpresentation.JWTMiddleware(pubKey), RolebackPasswordLinkHandlerfunc)
+	app.Put("/api/link/time/:uuid", commonpresentation.JWTMiddleware(pubKey), TimeLinkHandlerfunc)
+	app.Put("/api/link/rollback-time/:uuid", commonpresentation.JWTMiddleware(pubKey), RolebackTimeLinkHandlerfunc)
+	app.Put("/api/link/:uuid/:state", commonpresentation.JWTMiddleware(pubKey), MoveLinkHandlerfunc)
+
+	app.Delete("/api/link/:uuid", commonpresentation.JWTMiddleware(pubKey), DeleteLinkHandlerfunc)
+	app.Get("/api/link/:uuid", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(pubKey), GetLinkHandlerfunc)
+	app.Get("/api/links", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(pubKey), GetAllLinksHandlerfunc)
 
 	app.Get("/api/link/short/:short", commonpresentation.SmartCompress(), GetLinkByShortHandlerfunc)
 }

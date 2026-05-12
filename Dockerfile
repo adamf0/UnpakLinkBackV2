@@ -30,6 +30,7 @@ WORKDIR /app
 
 # Copy binary saja
 COPY --from=builder /app/app .
+COPY --from=builder /app/public.pem .
 
 # Default env (bisa dioverride saat run)
 ENV APP_ENV=production \

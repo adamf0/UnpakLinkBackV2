@@ -45,6 +45,7 @@ func (r *LinkRepository) GetByUuid(ctx context.Context, uid uuid.UUID) (*domainL
 	var Link domainLink.Link
 
 	err := r.db.WithContext(ctx).
+		Debug().
 		Where("uuid = ?", uid).
 		First(&Link).Error
 
@@ -70,6 +71,7 @@ func (r *LinkRepository) GetDefaultByUuid(
 	var rowData domainLink.LinkDefault
 
 	err := r.db.WithContext(ctx).
+		Debug().
 		Table("links").
 		Select("id, uuid, nama").
 		Where("uuid = ?", id).
@@ -96,6 +98,7 @@ func (r *LinkRepository) GetDefaultByShort(
 	var rowData domainLink.LinkDefault
 
 	err := r.db.WithContext(ctx).
+		Debug().
 		Table("links").
 		Where("short_url = ?", short).
 		Take(&rowData).Error // Take otomatis LIMIT 1
@@ -131,7 +134,7 @@ func (r *LinkRepository) GetAll(
 	var Links = make([]domainLink.Link, 0)
 	var total int64
 
-	db := r.db.WithContext(ctx).Model(&domainLink.Link{})
+	db := r.db.WithContext(ctx).Debug().Model(&domainLink.Link{})
 
 	// -------------------------------
 	// SEARCH FILTERS (ADVANCED)
@@ -261,6 +264,7 @@ func (r *LinkRepository) SetupUuid(ctx context.Context) error {
 
 	var ids []uint
 	if err := r.db.WithContext(ctx).
+		Debug().
 		Model(&domainLink.Link{}).
 		Where("uuid IS NULL OR uuid = ''").
 		Pluck("id", &ids).Error; err != nil {

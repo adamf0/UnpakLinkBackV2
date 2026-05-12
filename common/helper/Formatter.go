@@ -97,7 +97,11 @@ func (p MultiLayoutParse) Parse(input string) (*time.Time, error) {
 		return nil, nil
 	}
 	for _, layout := range p.Layouts {
-		if t, err := time.Parse(layout, input); err == nil {
+		// if t, err := time.Parse(layout, input); err == nil {
+		// 	return &t, nil
+		// }
+		loc, _ := time.LoadLocation("Asia/Jakarta")
+		if t, err := time.ParseInLocation(layout, input, loc); err == nil {
 			return &t, nil
 		}
 	}

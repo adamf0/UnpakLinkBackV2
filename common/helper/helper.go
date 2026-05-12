@@ -2,9 +2,12 @@ package helper
 
 import (
 	"crypto/md5"
+	"crypto/rsa"
 	"crypto/sha1"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"html"
@@ -344,4 +347,33 @@ func Sha1MD5(password string) string {
 	// sha1 dari hasil md5
 	sha1Hash := sha1.Sum([]byte(md5Str))
 	return hex.EncodeToString(sha1Hash[:])
+}
+
+func LoadRSAPublicKey(path string) (*rsa.PublicKey, error) {
+
+	pubKeyBytes, err := os.ReadFile(path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	block, _ := pem.Decode(pubKeyBytes)
+
+	if block == nil {
+		return nil, errors.New("failed to parse PEM block")
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+
+	if err != nil {
+		return nil, err
+	}
+
+	rsaPub, ok := pub.(*rsa.PublicKey)
+
+	if !ok {
+		return nil, errors.New("not RSA public key")
+	}
+
+	return rsaPub, nil
 }

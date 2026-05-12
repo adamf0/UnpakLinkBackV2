@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"context"
+	"log"
 	"os"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/mehdihadeli/go-mediatr"
 
 	commondomain "UnpakSiamida/common/domain"
+	"UnpakSiamida/common/helper"
 	commoninfra "UnpakSiamida/common/infrastructure"
 	commonpresentation "UnpakSiamida/common/presentation"
 	Clickdomain "UnpakSiamida/modules/click/domain"
@@ -108,6 +110,11 @@ func GetAllClicksHandlerfunc(c *fiber.Ctx) error {
 func ModuleClick(app *fiber.App) {
 	// admin := []string{"admin"}
 	// whoamiURL := "http://localhost:3000/whoami"
+	pubKey, err := helper.LoadRSAPublicKey("public.pem")
 
-	app.Get("/api/clicks", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), GetAllClicksHandlerfunc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	app.Get("/api/clicks", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(pubKey), GetAllClicksHandlerfunc)
 }

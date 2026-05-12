@@ -56,7 +56,7 @@ func (r *ClickRepository) GetAll(
 	var rows []domainClick.ClickDefault
 	var total int64
 
-	base := r.db.WithContext(ctx).
+	base := r.db.WithContext(ctx).Debug().
 		Model(&domainClick.Click{}).
 		Clauses(hints.ForceIndex("PRIMARY"))
 
@@ -146,7 +146,7 @@ func (r *ClickRepository) GetAll(
 	}
 
 	var links []domainLink.Link
-	if err := r.db.WithContext(ctx).
+	if err := r.db.WithContext(ctx).Debug().
 		Model(&domainLink.Link{}).
 		Clauses(hints.ForceIndex("PRIMARY")).
 		Where("id IN ?", linkIDs).

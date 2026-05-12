@@ -2,10 +2,12 @@ package presentation
 
 import (
 	"context"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mehdihadeli/go-mediatr"
 
+	"UnpakSiamida/common/helper"
 	commoninfra "UnpakSiamida/common/infrastructure"
 	commonpresentation "UnpakSiamida/common/presentation"
 	login "UnpakSiamida/modules/account/application/Login"
@@ -65,6 +67,12 @@ func WhoAmIHandler(c *fiber.Ctx) error {
 }
 
 func ModuleAccount(app *fiber.App) {
+	pubKey, err := helper.LoadRSAPublicKey("public.pem")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	app.Post("/api/login", LoginHandlerfunc)
-	app.Get("/api/whoami", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(), WhoAmIHandler)
+	app.Get("/api/whoami", commonpresentation.SmartCompress(), commonpresentation.JWTMiddleware(pubKey), WhoAmIHandler)
 }
