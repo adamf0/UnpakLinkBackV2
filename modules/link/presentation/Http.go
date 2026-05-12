@@ -188,8 +188,8 @@ func RolebackPasswordLinkHandlerfunc(c *fiber.Ctx) error {
 // @Summary Give time existing Link
 // @Tags Link
 // @Param uuid path string true "Link UUID" format(uuid)
-// @Param time start formData string true "time start (y-m-d h:i:s)"
-// @Param time end formData string true "time end (y-m-d h:i:s)"
+// @Param start formData string true "Time start (Y-m-d H:i:s)"
+// @Param end formData string true "Time end (Y-m-d H:i:s)"
 // @Produce json
 // @Success 200 {object} map[string]string "uuid of updated Link"
 // @Failure 400 {object} commoninfra.ResponseError
