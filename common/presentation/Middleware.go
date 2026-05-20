@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -327,6 +328,9 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 			if t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
 				return nil, errors.New("invalid signing method")
 			}
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("invalid signing method")
+			}
 
 			return publicKey, nil
 		})
@@ -377,10 +381,34 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 		/* =========================
 		 * SAVE CLAIMS
 		 * ========================= */
-		if sid, ok := claims["employeeid"].(string); ok {
-			c.Request().PostArgs().Set("sid", sid)
+		var sid string
+
+		// jika RS512 ambil employeeid
+		if token.Method.Alg() == jwt.SigningMethodRS512.Alg() {
+			var groups []string
+
+			if memberOf, ok := claims["memberOf"].([]interface{}); ok {
+				for _, v := range memberOf {
+					if s, ok := v.(string); ok {
+						groups = append(groups, s)
+					}
+				}
+			}
+
+			if val, ok := claims["employeeid"].(string); ok {
+				sid = val
+			}
+			if slices.Contains(groups, "/adm_pusat") {
+				sid = "putiklink"
+			}
+		} else {
+			// selain itu ambil sid
+			if val, ok := claims["sid"].(string); ok {
+				sid = val
+			}
 		}
 
+		c.Request().PostArgs().Set("sid", sid)
 		c.Request().PostArgs().Set("token", tokenStr)
 
 		return c.Next()
