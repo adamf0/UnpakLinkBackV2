@@ -386,7 +386,7 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 		if token.Method.Alg() == jwt.SigningMethodRS512.Alg() {
 			var groups []string
 
-			if memberOf, ok := claims["memberOf"].([]interface{}); ok {
+			if memberOf, ok := claims["group"].([]interface{}); ok {
 				for _, v := range memberOf {
 					if s, ok := v.(string); ok {
 						groups = append(groups, s)
@@ -394,11 +394,10 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 				}
 			}
 
-			if val, ok := claims["employeeid"].(string); ok {
-				sid = val
-			}
-			if slices.Contains(groups, "/adm_pusat") {
+			if slices.Contains(groups, "adm_pusat") {
 				sid = "putiklink"
+			} else if val, ok := claims["employeeid"].(string); ok {
+				sid = val
 			}
 		} else {
 			// selain itu ambil sid
