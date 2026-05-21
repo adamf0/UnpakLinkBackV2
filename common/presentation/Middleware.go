@@ -325,10 +325,9 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 
 			// wajib RS512
-			if t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
-				return nil, errors.New("invalid signing method")
-			}
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			_, ok := t.Method.(*jwt.SigningMethodHMAC)
+
+			if !ok || t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
 				return nil, errors.New("invalid signing method")
 			}
 
