@@ -327,7 +327,7 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 			if ok {
 				return jwtSecret, nil
 			}
-			if t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
+			if t.Method.Alg() == jwt.SigningMethodRS512.Alg() {
 				return publicKey, nil
 			}
 
