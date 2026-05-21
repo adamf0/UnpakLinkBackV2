@@ -323,16 +323,15 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 		 * PARSE TOKEN
 		 * ========================= */
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-
-			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, errors.New("invalid signing method")
+			_, ok := t.Method.(*jwt.SigningMethodHMAC)
+			if ok {
+				return jwtSecret, nil
 			}
-
 			if t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
-				return nil, errors.New("invalid signing algorithm")
+				return publicKey, nil
 			}
 
-			return publicKey, nil
+			return nil, errors.New("invalid signing method")
 		})
 
 		if err != nil {
