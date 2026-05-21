@@ -195,12 +195,12 @@ func HeaderSecurityMiddleware(cfg *HeaderSecurityConfig) fiber.Handler {
 				}
 
 				// 8) Cek host header spoof (Host harus sama atau allow domain)
-				if strings.ToLower(name) == "host" {
-					host := decoded
-					if !domainAllowed(host, cfg.AllowDomains) {
-						return c.Status(400).JSON(commoninfra.NewResponseError("common.check[A+8]", "host header spoof: "+host))
-					}
-				}
+				// if strings.ToLower(name) == "host" {
+				// 	host := decoded
+				// 	if !domainAllowed(host, cfg.AllowDomains) {
+				// 		return c.Status(400).JSON(commoninfra.NewResponseError("common.check[A+8]", "host header spoof: "+host))
+				// 	}
+				// }
 
 				// 9) Cek embedded domain dalam text
 				// hosts := extractHosts(decoded) //ini kenapa null
@@ -324,11 +324,12 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 		 * ========================= */
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 
-			// wajib RS512
-			_, ok := t.Method.(*jwt.SigningMethodHMAC)
-
-			if !ok || t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
+			if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 				return nil, errors.New("invalid signing method")
+			}
+
+			if t.Method.Alg() != jwt.SigningMethodRS512.Alg() {
+				return nil, errors.New("invalid signing algorithm")
 			}
 
 			return publicKey, nil
