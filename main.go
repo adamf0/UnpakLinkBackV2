@@ -13,7 +13,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mehdihadeli/go-mediatr"
 
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -111,11 +110,11 @@ func main() {
 		EnableStackTrace: true,
 	}))
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-		AllowHeaders: "*",
-	}))
+	// app.Use(cors.New(cors.Config{
+	// 	AllowOrigins: "*",
+	// 	AllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+	// 	AllowHeaders: "*",
+	// }))
 	app.Use(helmet.New(helmet.Config{
 		XSSProtection:             "1; mode=block",
 		ContentTypeNosniff:        "nosniff",     // X-Content-Type-Options
