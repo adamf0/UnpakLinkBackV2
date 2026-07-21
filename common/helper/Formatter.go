@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"time"
+	_ "time/tzdata"
 )
 
 // ==================== Interface ====================
@@ -96,11 +97,13 @@ func (p MultiLayoutParse) Parse(input string) (*time.Time, error) {
 	if strings.TrimSpace(input) == "" {
 		return nil, nil
 	}
+
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil || loc == nil {
+		loc = time.FixedZone("WIB", 7*3600)
+	}
+
 	for _, layout := range p.Layouts {
-		// if t, err := time.Parse(layout, input); err == nil {
-		// 	return &t, nil
-		// }
-		loc, _ := time.LoadLocation("Asia/Jakarta")
 		if t, err := time.ParseInLocation(layout, input, loc); err == nil {
 			return &t, nil
 		}

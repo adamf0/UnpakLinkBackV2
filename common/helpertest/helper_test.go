@@ -184,6 +184,19 @@ func TestFormatWIB(t *testing.T) {
 	}
 }
 
+func TestMultiLayoutParse_DateTime(t *testing.T) {
+	factory := helper.DateLayoutSecondFactory{}
+	parser := factory.CreateParser()
+
+	parsed, err := parser.Parse("2026-07-14 09:41:00")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if parsed == nil {
+		t.Fatalf("expected non-nil time pointer")
+	}
+}
+
 //[pr] ganti ke chain
 // func TestFormatDateTimeID(t *testing.T) {
 // 	tests := []struct {
