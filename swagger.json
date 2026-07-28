@@ -503,6 +503,9 @@
         "domain.Link": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "creator": {
                     "type": "string"
                 },
@@ -526,6 +529,9 @@
                 },
                 "status": {
                     "description": "arsip, delete",
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 },
                 "uuid": {
