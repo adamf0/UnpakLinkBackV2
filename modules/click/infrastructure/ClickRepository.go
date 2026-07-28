@@ -42,6 +42,10 @@ var allowedSearchColumns = map[string]string{
 	"creator":   "creator",
 }
 
+var allowedClickColumns = map[string]string{
+	"created_at": "created_at",
+}
+
 // ------------------------
 // GET ALL
 // ------------------------
@@ -61,35 +65,58 @@ func (r *ClickRepository) GetAll(
 		Clauses(hints.ForceIndex("PRIMARY"))
 
 	// -------------------------------------------------
-	// FILTER (khusus kolom link → pakai subquery)
+	// FILTER (khusus kolom link → pakai subquery, kolom click → langsung)
 	// -------------------------------------------------
-	if len(searchFilters) > 0 || strings.TrimSpace(search) != "" {
+	hasLinkFilter := false
+	linkSub := r.db.Model(&domainLink.Link{}).Select("id")
 
-		linkSub := r.db.Model(&domainLink.Link{}).Select("id")
+	for _, f := range searchFilters {
+		fieldLower := strings.ToLower(f.Field)
 
-		for _, f := range searchFilters {
-			col, ok := allowedSearchColumns[strings.ToLower(f.Field)]
-			if !ok {
-				continue
-			}
-
+		// Cek apakah kolom click
+		if clickCol, ok := allowedClickColumns[fieldLower]; ok {
 			val := ""
 			if f.Value != nil {
 				val = strings.TrimSpace(*f.Value)
 			}
-
 			switch strings.ToLower(f.Operator) {
 			case "eq":
-				linkSub = linkSub.Where(col+" = ?", val)
+				base = base.Where(clickCol+" = ?", val)
 			case "neq":
-				linkSub = linkSub.Where(col+" <> ?", val)
+				base = base.Where(clickCol+" <> ?", val)
+			case "gte":
+				base = base.Where(clickCol+" >= ?", val)
+			case "lte":
+				base = base.Where(clickCol+" <= ?", val)
 			case "like":
-				linkSub = linkSub.Where(col+" LIKE ?", "%"+val+"%")
+				base = base.Where(clickCol+" LIKE ?", "%"+val+"%")
 			case "in":
-				linkSub = linkSub.Where(col+" IN ?", strings.Split(val, ","))
+				base = base.Where(clickCol+" IN ?", strings.Split(val, ","))
 			}
+			continue
 		}
 
+		// Cek apakah kolom link
+		if linkCol, ok := allowedSearchColumns[fieldLower]; ok {
+			hasLinkFilter = true
+			val := ""
+			if f.Value != nil {
+				val = strings.TrimSpace(*f.Value)
+			}
+			switch strings.ToLower(f.Operator) {
+			case "eq":
+				linkSub = linkSub.Where(linkCol+" = ?", val)
+			case "neq":
+				linkSub = linkSub.Where(linkCol+" <> ?", val)
+			case "like":
+				linkSub = linkSub.Where(linkCol+" LIKE ?", "%"+val+"%")
+			case "in":
+				linkSub = linkSub.Where(linkCol+" IN ?", strings.Split(val, ","))
+			}
+		}
+	}
+
+	if hasLinkFilter || strings.TrimSpace(search) != "" {
 		// global search
 		if strings.TrimSpace(search) != "" {
 			like := "%" + search + "%"
