@@ -22,6 +22,8 @@ type Link struct {
 	EndAccess   *time.Time `gorm:""`
 	Password    *string    `gorm:"type:longtext;"`
 	Status      *string    `gorm:"type:longtext;column:status;"` //arsip, delete
+	CreatedAt   time.Time  `gorm:"column:created_at;autoCreateTime"`
+	UpdatedAt   time.Time  `gorm:"column:updated_at;autoUpdateTime"`
 }
 
 func (Link) TableName() string {
