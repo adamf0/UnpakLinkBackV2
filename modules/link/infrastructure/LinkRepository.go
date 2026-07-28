@@ -256,6 +256,7 @@ func (r *LinkRepository) Update(ctx context.Context, link *domainLink.Link) erro
 func (r *LinkRepository) Delete(ctx context.Context, uid uuid.UUID) error {
 	return r.db.WithContext(ctx).
 		Where("uuid = ?", uid).
+		Unscoped().
 		Delete(&domainLink.Link{}).Error
 }
 
