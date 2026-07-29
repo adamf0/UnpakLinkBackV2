@@ -76,6 +76,8 @@ func NewLink(shortUrl string, longUrl string, password *string, start *string, e
 		EndAccess:   endTime,
 		Creator:     creator,
 		Status:      helper.StrPtr("active"),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	return common.SuccessValue(jenisfile)
