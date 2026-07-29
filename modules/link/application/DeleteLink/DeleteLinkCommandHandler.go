@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"os"
 
 	domainlink "UnpakSiamida/modules/link/domain"
 	"time"
@@ -36,7 +37,7 @@ func (h *DeleteLinkCommandHandler) Handle(
 		return "", err
 	}
 
-	if prev.Creator != cmd.Creator {
+	if cmd.Creator != os.Getenv("Administrator") && prev.Creator != cmd.Creator {
 		return "", domainlink.RejectDelete()
 	}
 
