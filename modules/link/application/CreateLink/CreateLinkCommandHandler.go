@@ -27,6 +27,7 @@ func (h *CreateLinkCommandHandler) Handle(
 		cmd.Start,
 		cmd.End,
 		cmd.Creator,
+		cmd.CreatorName,
 		countLink == 0,
 	)
 

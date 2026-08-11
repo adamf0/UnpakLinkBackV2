@@ -57,14 +57,16 @@ func CreateLinkHandlerfunc(c *fiber.Ctx) error {
 	start := helper.StrPtr(c.FormValue("start"))
 	end := helper.StrPtr(c.FormValue("end"))
 	sid := c.FormValue("sid")
+	creatorName := c.FormValue("creator_name")
 
 	cmd := CreateLink.CreateLinkCommand{
-		ShortUrl: shortUrl,
-		LongUrl:  longUrl,
-		Password: password,
-		Start:    start,
-		End:      end,
-		Creator:  sid,
+		ShortUrl:    shortUrl,
+		LongUrl:     longUrl,
+		Password:    password,
+		Start:       start,
+		End:         end,
+		Creator:     sid,
+		CreatorName: creatorName,
 	}
 
 	uuid, err := mediatr.Send[CreateLink.CreateLinkCommand, string](context.Background(), cmd)

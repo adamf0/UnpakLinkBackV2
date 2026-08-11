@@ -12,6 +12,7 @@ type LinkDefault struct {
 	ShortUrl    string
 	LongUrl     string
 	Creator     string
+	CreatorName string
 	StartAccess *time.Time
 	EndAccess   *time.Time
 	Password    *string

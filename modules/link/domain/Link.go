@@ -18,6 +18,7 @@ type Link struct {
 	ShortUrl    string     `gorm:"type:longtext;column:short_url;"`
 	LongUrl     string     `gorm:"type:longtext;column:long_url;"`
 	Creator     string     `gorm:"type:longtext;column:creator;"`
+	CreatorName string     `gorm:"type:longtext;column:creator_name;"`
 	StartAccess *time.Time `gorm:""`
 	EndAccess   *time.Time `gorm:""`
 	Password    *string    `gorm:"type:longtext;"`
@@ -31,7 +32,7 @@ func (Link) TableName() string {
 }
 
 // === CREATE ===
-func NewLink(shortUrl string, longUrl string, password *string, start *string, end *string, creator string, isUnique bool) common.ResultValue[*Link] {
+func NewLink(shortUrl string, longUrl string, password *string, start *string, end *string, creator string, creatorName string, isUnique bool) common.ResultValue[*Link] {
 	if !isUnique {
 		return common.FailureValue[*Link](NotUnique())
 	}
@@ -75,6 +76,7 @@ func NewLink(shortUrl string, longUrl string, password *string, start *string, e
 		StartAccess: startTime,
 		EndAccess:   endTime,
 		Creator:     creator,
+		CreatorName: creatorName,
 		Status:      helper.StrPtr("active"),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),

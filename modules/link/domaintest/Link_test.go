@@ -19,7 +19,7 @@ func TestNewLink_Success(t *testing.T) {
 	long := "https://google.com"
 	creator := "admin"
 
-	res := domain.NewLink(short, long, nil, nil, nil, creator, true)
+	res := domain.NewLink(short, long, nil, nil, nil, creator, "", true)
 
 	require.True(t, res.IsSuccess)
 	link := res.Value
@@ -39,7 +39,7 @@ func TestNewLink_Success(t *testing.T) {
 // CREATE FAIL
 // ====================
 func TestNewLink_NotUnique(t *testing.T) {
-	res := domain.NewLink("a", "b", nil, nil, nil, "admin", false)
+	res := domain.NewLink("a", "b", nil, nil, nil, "admin", "", false)
 
 	require.False(t, res.IsSuccess)
 	assert.Equal(t, domain.NotUnique().Code, res.Error.Code)
@@ -49,7 +49,7 @@ func TestNewLink_NotUnique(t *testing.T) {
 // UPDATE SUCCESS
 // ====================
 func TestUpdateLink_Success(t *testing.T) {
-	res := domain.NewLink("abc", "long", nil, nil, nil, "admin", true)
+	res := domain.NewLink("abc", "long", nil, nil, nil, "admin", "", true)
 	require.True(t, res.IsSuccess)
 
 	prev := res.Value
@@ -65,7 +65,7 @@ func TestUpdateLink_Success(t *testing.T) {
 // UPDATE FAIL CASES
 // ====================
 func TestUpdateLink_Fail(t *testing.T) {
-	res := domain.NewLink("abc", "long", nil, nil, nil, "admin", true)
+	res := domain.NewLink("abc", "long", nil, nil, nil, "admin", "", true)
 	require.True(t, res.IsSuccess)
 
 	prev := res.Value
@@ -126,7 +126,7 @@ func TestUpdateLink_Fail(t *testing.T) {
 // STATUS MOVEMENT TEST
 // ====================
 func TestMoveStatus_Success(t *testing.T) {
-	res := domain.NewLink("a", "b", nil, nil, nil, "admin", true)
+	res := domain.NewLink("a", "b", nil, nil, nil, "admin", "", true)
 	require.True(t, res.IsSuccess)
 
 	prev := res.Value
@@ -157,7 +157,7 @@ func TestMoveStatus_Success(t *testing.T) {
 // GIVE TIME SUCCESS
 // ====================
 func TestGiveTime_Success(t *testing.T) {
-	res := domain.NewLink("a", "b", nil, nil, nil, "admin", true)
+	res := domain.NewLink("a", "b", nil, nil, nil, "admin", "", true)
 	require.True(t, res.IsSuccess)
 
 	prev := res.Value
@@ -176,7 +176,7 @@ func TestGiveTime_Success(t *testing.T) {
 // GIVE TIME FAIL FORMAT
 // ====================
 func TestGiveTime_InvalidFormat(t *testing.T) {
-	res := domain.NewLink("a", "b", nil, nil, nil, "admin", true)
+	res := domain.NewLink("a", "b", nil, nil, nil, "admin", "", true)
 	require.True(t, res.IsSuccess)
 
 	prev := res.Value
@@ -191,7 +191,7 @@ func TestGiveTime_InvalidFormat(t *testing.T) {
 // PASSWORD TEST
 // ====================
 func TestPassword_Success(t *testing.T) {
-	res := domain.NewLink("a", "b", nil, nil, nil, "admin", true)
+	res := domain.NewLink("a", "b", nil, nil, nil, "admin", "", true)
 	require.True(t, res.IsSuccess)
 
 	prev := res.Value

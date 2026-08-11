@@ -406,7 +406,13 @@ func JWTMiddleware(publicKey *rsa.PublicKey) fiber.Handler {
 			}
 		}
 
+		var creatorName string
+		if val, ok := claims["name"].(string); ok && val != "" {
+			creatorName = val
+		}
+
 		c.Request().PostArgs().Set("sid", sid)
+		c.Request().PostArgs().Set("creator_name", creatorName)
 		c.Request().PostArgs().Set("token", tokenStr)
 
 		return c.Next()
