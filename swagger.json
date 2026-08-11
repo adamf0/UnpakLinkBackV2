@@ -509,6 +509,9 @@
                 "creator": {
                     "type": "string"
                 },
+                "creatorName": {
+                    "type": "string"
+                },
                 "endAccess": {
                     "type": "string"
                 },
